@@ -56,6 +56,7 @@ def calibrate_px_size(fpath_calib_img, fpath_cfg_file='calibration.cfg'):
     config = configparser.ConfigParser()
     config['PX_CALIBRATION'] = {'mm_per_px_vert': str(px_size_vertical),
                                 'mm_per_px_horz': str(px_size_horizontal)}
+    input('Press [Enter] to overwrite config file.')
     with open(fpath_cfg_file, 'w') as cfg:
         config.write(cfg)
 
