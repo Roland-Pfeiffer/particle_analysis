@@ -46,23 +46,35 @@ def get_px_size(img: np.ndarray, title=None):
     return mm_per_px
 
 
-def calibrate_px_size(fpath_calib_img, fpath_cfg_file='calibration.cfg'):
+def px_ratio(px_size_x, px_size_y):
+    ratio = px_size_x / px_size_y
+    return ratio
+
+
+def calibrate_px_size(fpath_calib_img, fpath_cfg_file='settings.cfg'):
     img = cv2.imread(fpath_calib_img)
     px_size_vertical = get_px_size(img, title='Vertical')
     px_size_horizontal = get_px_size(img, title='Horizontal')
     print(px_size_vertical)
     print(px_size_horizontal)
+    ratio = px_ratio(px_size_horizontal, px_size_vertical)
+    print(f'x/y ratio: {ratio}')
 
+    # Produce a warning if the horizontal pixel size deviates by more than 20% of the vertical one.
+    if abs(1 - ratio) > 0.2:  # the same as this -> if ratio > 1.2 or ratio < 0.8
+        print(f'[WARNING]\tPixel size ratio (x/y): {ratio}')
+
+    input('Press [Enter] to overwrite settings.cfg file.')
+    # Initiate configparser
     config = configparser.ConfigParser()
-    config['PX_CALIBRATION'] = {'mm_per_px_vert': str(px_size_vertical),
-                                'mm_per_px_horz': str(px_size_horizontal)}
-    input('Press [Enter] to overwrite config file.')
+    config.read(fpath_cfg_file)  # Read the full file so that the other sections are not lost
+    # Overwrite the cgf file
     with open(fpath_cfg_file, 'w') as cfg:
+        config['PX_CALIBRATION'] = {'mm_per_px_vert': str(px_size_vertical),
+                                    'mm_per_px_horz': str(px_size_horizontal)}
         config.write(cfg)
 
 
 if __name__ == '__main__':
-    fpath_particles = '/media/findux/DATA/Code/particle_analysis/images/microplastics_01-black.png'
-    fpath_calibration = '/media/findux/DATA/Code/particle_analysis/images/2400_dpi_size_calibration.png'
-
+    fpath_calibration = '/media/findux/DATA/Code/particle_analysis/images/1200_dpi_darkfield_calibration.png'
     calibrate_px_size(fpath_calibration)
